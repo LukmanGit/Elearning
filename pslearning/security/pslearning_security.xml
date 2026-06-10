@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- ============================================================ -->
+        <!-- MODULE CATEGORY                                              -->
+        <!-- ============================================================ -->
+        <record id="module_category_pslearning" model="ir.module.category">
+            <field name="name">PS Learning</field>
+            <field name="description">Hak akses untuk modul PS Learning (E-Learning)</field>
+            <field name="sequence">50</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- GROUPS / ACTORS                                              -->
+        <!-- ============================================================ -->
+
+        <!-- Actor 1: Participant (Peserta) -->
+        <record id="group_pslearning_participant" model="res.groups">
+            <field name="name">Participant</field>
+            <field name="category_id" ref="module_category_pslearning"/>
+            <field name="comment">Peserta pembelajaran: dapat mendaftar course,
+                mengerjakan pre-test, mempelajari materi, mengerjakan post-test,
+                dan melihat hasil pembelajaran. Tidak dapat membuat course,
+                materi, maupun soal.</field>
+        </record>
+
+        <!-- Actor 2: Admin / Pengajar (Manager) -->
+        <record id="group_pslearning_manager" model="res.groups">
+            <field name="name">Admin / Pengajar</field>
+            <field name="category_id" ref="module_category_pslearning"/>
+            <!-- Manager mewarisi semua menu/akses Participant -->
+            <field name="implied_ids" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="comment">Administrator / Pengajar: akses penuh atas seluruh
+                modul (course, materi, pre/post-test, soal, enrollment, dan hasil test).</field>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- RECORD RULES - PARTICIPANT (terbatas)                        -->
+        <!-- ============================================================ -->
+
+        <!-- Course: hanya yang sudah dipublikasi / diarsipkan -->
+        <record id="rule_course_participant" model="ir.rule">
+            <field name="name">Participant: Course Dipublikasi</field>
+            <field name="model_id" ref="model_pslearning_course"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('state', 'in', ['upcoming', 'published', 'archived'])]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Material: hanya yang dipublikasi -->
+        <record id="rule_material_participant" model="ir.rule">
+            <field name="name">Participant: Materi Dipublikasi</field>
+            <field name="model_id" ref="model_pslearning_material"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('state', '=', 'published')]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Test: hanya yang dipublikasi -->
+        <record id="rule_test_participant" model="ir.rule">
+            <field name="name">Participant: Test Dipublikasi</field>
+            <field name="model_id" ref="model_pslearning_test"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('state', '=', 'published')]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Question: hanya milik test yang dipublikasi -->
+        <record id="rule_question_participant" model="ir.rule">
+            <field name="name">Participant: Soal Test Dipublikasi</field>
+            <field name="model_id" ref="model_pslearning_question"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('test_id.state', '=', 'published')]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Answer: hanya milik soal pada test yang dipublikasi -->
+        <record id="rule_answer_participant" model="ir.rule">
+            <field name="name">Participant: Pilihan Jawaban Test Dipublikasi</field>
+            <field name="model_id" ref="model_pslearning_answer"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('question_id.test_id.state', '=', 'published')]</field>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- Enrollment: hanya pendaftaran milik sendiri -->
+        <record id="rule_enrollment_participant" model="ir.rule">
+            <field name="name">Participant: Enrollment Sendiri</field>
+            <field name="model_id" ref="model_pslearning_enrollment"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+        </record>
+
+        <!-- Test Attempt: hanya percobaan milik sendiri -->
+        <record id="rule_attempt_participant" model="ir.rule">
+            <field name="name">Participant: Percobaan Test Sendiri</field>
+            <field name="model_id" ref="model_pslearning_test_attempt"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+        </record>
+
+        <!-- Attempt Answer: hanya jawaban pada percobaan milik sendiri -->
+        <record id="rule_attempt_answer_participant" model="ir.rule">
+            <field name="name">Participant: Jawaban Percobaan Sendiri</field>
+            <field name="model_id" ref="model_pslearning_attempt_answer"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_participant'))]"/>
+            <field name="domain_force">[('attempt_id.user_id', '=', user.id)]</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- RECORD RULES - MANAGER (penuh, OR dengan rule participant)   -->
+        <!-- Diperlukan karena Manager mewarisi group Participant.        -->
+        <!-- ============================================================ -->
+        <record id="rule_course_manager" model="ir.rule">
+            <field name="name">Manager: Semua Course</field>
+            <field name="model_id" ref="model_pslearning_course"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_material_manager" model="ir.rule">
+            <field name="name">Manager: Semua Materi</field>
+            <field name="model_id" ref="model_pslearning_material"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_test_manager" model="ir.rule">
+            <field name="name">Manager: Semua Test</field>
+            <field name="model_id" ref="model_pslearning_test"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_question_manager" model="ir.rule">
+            <field name="name">Manager: Semua Soal</field>
+            <field name="model_id" ref="model_pslearning_question"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_answer_manager" model="ir.rule">
+            <field name="name">Manager: Semua Pilihan Jawaban</field>
+            <field name="model_id" ref="model_pslearning_answer"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_enrollment_manager" model="ir.rule">
+            <field name="name">Manager: Semua Enrollment</field>
+            <field name="model_id" ref="model_pslearning_enrollment"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_attempt_manager" model="ir.rule">
+            <field name="name">Manager: Semua Percobaan Test</field>
+            <field name="model_id" ref="model_pslearning_test_attempt"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_attempt_answer_manager" model="ir.rule">
+            <field name="name">Manager: Semua Jawaban Percobaan</field>
+            <field name="model_id" ref="model_pslearning_attempt_answer"/>
+            <field name="groups" eval="[(4, ref('group_pslearning_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+    </data>
+</odoo>

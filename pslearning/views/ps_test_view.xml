@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_pslearning_test_tree" model="ir.ui.view">
+        <field name="name">pslearning.test.tree</field>
+        <field name="model">pslearning.test</field>
+        <field name="arch" type="xml">
+            <tree string="Test"
+                  decoration-success="state == 'published'"
+                  decoration-muted="state == 'draft'">
+                <field name="name"/>
+                <field name="course_id"/>
+                <field name="test_type" widget="badge"
+                       decoration-info="test_type == 'pretest'"
+                       decoration-warning="test_type == 'posttest'"/>
+                <field name="question_count" string="Soal"/>
+                <field name="passing_score" string="Nilai Lulus (%)"/>
+                <field name="time_limit" string="Waktu (Menit)"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'published'"
+                       decoration-muted="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_pslearning_test_form" model="ir.ui.view">
+        <field name="name">pslearning.test.form</field>
+        <field name="model">pslearning.test</field>
+        <field name="arch" type="xml">
+            <form string="Test">
+                <header>
+                    <button name="action_publish" type="object"
+                            string="Publikasikan" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_set_draft" type="object"
+                            string="Kembalikan ke Draft"
+                            invisible="state != 'published'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Nama Test..."/></h1>
+                    </div>
+                    <group>
+                        <group string="Informasi Test">
+                            <field name="course_id" options="{'no_create': True}"/>
+                            <field name="material_id" options="{'no_create': True}"
+                                   help="Materi acuan. Soal baru otomatis memakai materi ini."/>
+                            <field name="test_type"/>
+                            <field name="passing_score"/>
+                            <field name="time_limit"
+                                   help="0 = tidak ada batas waktu"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Daftar Soal" name="questions">
+                            <field name="question_ids"
+                                   context="{'default_material_id': material_id}">
+                                <tree>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="question_type"/>
+                                    <field name="material_id"
+                                           readonly="parent.material_id != False"
+                                           options="{'no_create': True}"/>
+                                    <field name="score"/>
+                                </tree>
+                                <form string="Soal">
+                                    <group>
+                                        <group>
+                                            <field name="sequence"/>
+                                            <field name="question_type"/>
+                                            <field name="material_id"
+                                                   readonly="parent.material_id != False"
+                                                   options="{'no_create': True}"/>
+                                            <field name="score"/>
+                                        </group>
+                                    </group>
+                                    <separator string="Pertanyaan"/>
+                                    <field name="question_text" nolabel="1"
+                                           placeholder="Tulis pertanyaan di sini..."/>
+                                    <separator string="Pilihan Jawaban"
+                                               invisible="question_type != 'multiple_choice'"/>
+                                    <field name="answer_ids" nolabel="1"
+                                           invisible="question_type != 'multiple_choice'">
+                                        <tree editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="answer_text"/>
+                                            <field name="is_correct"/>
+                                        </tree>
+                                    </field>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pslearning_test_search" model="ir.ui.view">
+        <field name="name">pslearning.test.search</field>
+        <field name="model">pslearning.test</field>
+        <field name="arch" type="xml">
+            <search string="Cari Test">
+                <field name="name"/>
+                <field name="course_id"/>
+                <filter string="Pre-Test" name="filter_pretest"
+                        domain="[('test_type', '=', 'pretest')]"/>
+                <filter string="Post-Test" name="filter_posttest"
+                        domain="[('test_type', '=', 'posttest')]"/>
+                <filter string="Dipublikasi" name="filter_published"
+                        domain="[('state', '=', 'published')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Course" name="group_course"
+                            context="{'group_by': 'course_id'}"/>
+                    <filter string="Tipe" name="group_type"
+                            context="{'group_by': 'test_type'}"/>
+                </group>
+                <!-- Facet filter by Course -->
+                <searchpanel>
+                    <field name="course_id" string="Course" icon="fa-graduation-cap"
+                           enable_counters="1"/>
+                    <field name="test_type" string="Tipe Test" icon="fa-tags"
+                           enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pslearning_test" model="ir.actions.act_window">
+        <field name="name">Test</field>
+        <field name="res_model">pslearning.test</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_pslearning_test_search"/>
+    </record>
+
+</odoo>

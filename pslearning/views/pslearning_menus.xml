@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- ROOT MENU (terlihat oleh kedua actor)                        -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pslearning_root"
+              name="PASI Learning"
+              sequence="50"
+              web_icon="pslearning,static/description/icon.png"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <!-- ============================================================ -->
+    <!-- DASHBOARD PESERTA (Enrollment Kanban) - kedua actor          -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pslearning_dashboard"
+              name="Dashboard Belajar"
+              parent="menu_pslearning_root"
+              action="action_pslearning_enrollment"
+              sequence="5"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <!-- ============================================================ -->
+    <!-- KATALOG COURSE - kedua actor (peserta mendaftar di sini)     -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pslearning_course_root"
+              name="Courses &amp; Materials"
+              parent="menu_pslearning_root"
+              sequence="10"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <menuitem id="menu_pslearning_course"
+              name="Katalog Course"
+              parent="menu_pslearning_course_root"
+              action="action_ps_course"
+              sequence="10"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <!-- Materi: hanya Admin/Pengajar -->
+    <menuitem id="menu_ps_material"
+              name="Materi"
+              parent="menu_pslearning_course_root"
+              action="action_ps_material"
+              sequence="20"
+              groups="group_pslearning_manager"/>
+
+    <!-- Test &amp; Soal: hanya Admin/Pengajar -->
+    <menuitem id="menu_pslearning_test"
+              name="Test &amp; Soal"
+              parent="menu_pslearning_course_root"
+              action="action_pslearning_test"
+              sequence="30"
+              groups="group_pslearning_manager"/>
+
+    <!-- ============================================================ -->
+    <!-- PEMBELAJARAN (Enrollment + Hasil) - kedua actor              -->
+    <!-- ============================================================ -->
+    <menuitem id="menu_pslearning_learning_root"
+              name="Pembelajaran"
+              parent="menu_pslearning_root"
+              sequence="20"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <menuitem id="menu_pslearning_enrollment"
+              name="Enrollment"
+              parent="menu_pslearning_learning_root"
+              action="action_pslearning_enrollment"
+              sequence="10"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+
+    <menuitem id="menu_pslearning_attempt"
+              name="Hasil Pembelajaran"
+              parent="menu_pslearning_learning_root"
+              action="action_pslearning_attempt"
+              sequence="20"
+              groups="group_pslearning_participant,group_pslearning_manager"/>
+</odoo>

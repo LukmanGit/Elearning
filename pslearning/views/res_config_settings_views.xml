@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_pslearning" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pslearning</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="PS Learning" string="PS Learning" name="pslearning"
+                     logo="/pslearning/static/description/icon.png">
+                    <block title="Tampilan Halaman Login" name="ps_login_appearance">
+                        <setting string="Sembunyikan Header &amp; Footer di Halaman Login"
+                                 help="Menyembunyikan header dan footer website pada halaman login, signup, dan reset password. Berlaku untuk seluruh sistem (semua pengguna).">
+                            <field name="pslearning_hide_login_chrome"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_course_participant,pslearning.course.participant,model_pslearning_course,group_pslearning_participant,1,0,0,0
+access_material_participant,pslearning.material.participant,model_pslearning_material,group_pslearning_participant,1,0,0,0
+access_enrollment_participant,pslearning.enrollment.participant,model_pslearning_enrollment,group_pslearning_participant,1,1,1,0
+access_test_participant,pslearning.test.participant,model_pslearning_test,group_pslearning_participant,1,0,0,0
+access_question_participant,pslearning.question.participant,model_pslearning_question,group_pslearning_participant,1,0,0,0
+access_answer_participant,pslearning.answer.participant,model_pslearning_answer,group_pslearning_participant,1,0,0,0
+access_attempt_participant,pslearning.test.attempt.participant,model_pslearning_test_attempt,group_pslearning_participant,1,1,1,0
+access_attempt_answer_participant,pslearning.attempt.answer.participant,model_pslearning_attempt_answer,group_pslearning_participant,1,1,1,0
+access_course_manager,pslearning.course.manager,model_pslearning_course,group_pslearning_manager,1,1,1,1
+access_material_manager,pslearning.material.manager,model_pslearning_material,group_pslearning_manager,1,1,1,1
+access_enrollment_manager,pslearning.enrollment.manager,model_pslearning_enrollment,group_pslearning_manager,1,1,1,1
+access_test_manager,pslearning.test.manager,model_pslearning_test,group_pslearning_manager,1,1,1,1
+access_question_manager,pslearning.question.manager,model_pslearning_question,group_pslearning_manager,1,1,1,1
+access_answer_manager,pslearning.answer.manager,model_pslearning_answer,group_pslearning_manager,1,1,1,1
+access_attempt_manager,pslearning.test.attempt.manager,model_pslearning_test_attempt,group_pslearning_manager,1,1,1,1
+access_attempt_answer_manager,pslearning.attempt.answer.manager,model_pslearning_attempt_answer,group_pslearning_manager,1,1,1,1

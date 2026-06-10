@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- SEMBUNYIKAN HEADER & FOOTER WEBSITE DI HALAMAN AUTH          -->
+    <!-- (/web/login, /web/signup, /web/reset_password)               -->
+    <!-- CATATAN: web.login_layout adalah layout bersama untuk semua  -->
+    <!-- halaman login/signup/reset, sehingga satu inherit ini sudah  -->
+    <!-- mencakup ketiganya. Berlaku untuk SELURUH instance.          -->
+    <!-- ============================================================ -->
+    <template id="ps_hide_login_chrome"
+              inherit_id="web.login_layout"
+              name="PS Learning - Sembunyikan Header/Footer Login">
+        <xpath expr="." position="inside">
+            <t t-set="ps_hide_chrome"
+               t-value="env['ir.config_parameter'].sudo().get_param('pslearning.hide_login_chrome')"/>
+            <t t-if="ps_hide_chrome and ps_hide_chrome != 'False'">
+                <style>
+                    #wrapwrap > header,
+                    #wrapwrap > footer,
+                    header#top,
+                    .o_header_standard,
+                    .o_main_navbar,
+                    footer.o_footer,
+                    footer { display: none !important; }
+                    #wrapwrap { min-height: 100vh; }
+                </style>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>

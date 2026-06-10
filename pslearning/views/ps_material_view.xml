@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- TREE / LIST VIEW                                               -->
+    <!-- ============================================================ -->
+    <record id="view_ps_material_tree" model="ir.ui.view">
+        <field name="name">pslearning.material.tree</field>
+        <field name="model">pslearning.material</field>
+        <field name="arch" type="xml">
+            <tree string="Materi" sample="1"
+                  decoration-muted="state == 'draft'"
+                  decoration-success="state == 'published'">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="course_id"/>
+                <field name="material_type"/>
+                <field name="duration_minutes" optional="show"/>
+                <field name="attachment_count" string="Lampiran" optional="hide"/>
+                <field name="is_required" widget="boolean_toggle" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'published'"
+                       decoration-info="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- KANBAN VIEW                                                    -->
+    <!-- ============================================================ -->
+    <record id="view_ps_material_kanban" model="ir.ui.view">
+        <field name="name">pslearning.material.kanban</field>
+        <field name="model">pslearning.material</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" default_group_by="course_id">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="course_id"/>
+                <field name="material_type"/>
+                <field name="duration_minutes"/>
+                <field name="state"/>
+                <field name="is_required"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click oe_kanban_card">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <small class="o_kanban_record_subtitle text-muted">
+                                        <field name="material_type"/>
+                                    </small>
+                                </div>
+                                <field name="state" widget="label_selection"
+                                       options="{'classes': {'draft': 'default', 'published': 'success'}}"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <span t-if="record.duration_minutes.raw_value" class="text-muted">
+                                    <i class="fa fa-clock-o" role="img" aria-label="Durasi" title="Durasi"/>
+                                    <field name="duration_minutes"/> menit
+                                </span>
+                                <span t-if="record.is_required.raw_value"
+                                      class="badge rounded-pill text-bg-warning ms-2">
+                                    Wajib
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- FORM VIEW                                                      -->
+    <!-- ============================================================ -->
+    <record id="view_ps_material_form" model="ir.ui.view">
+        <field name="name">pslearning.material.form</field>
+        <field name="model">pslearning.material</field>
+        <field name="arch" type="xml">
+            <form string="Materi Pembelajaran">
+                <header>
+                    <button name="action_publish" type="object"
+                            string="Publikasikan" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_set_draft" type="object"
+                            string="Kembalikan ke Draft"
+                            invisible="state != 'published'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_view_tests" icon="fa-question-circle"
+                                invisible="not id">
+                            <field name="test_count" widget="statinfo" string="Test Terkait"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_create_test" icon="fa-plus-circle"
+                                invisible="not id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Buat</span>
+                                <span class="o_stat_text">Test</span>
+                            </div>
+                        </button>
+                        <button class="oe_stat_button" type="action"
+                                name="%(base.action_attachment)d" icon="fa-paperclip"
+                                context="{'default_res_model': 'pslearning.material', 'default_res_id': active_id}">
+                            <field name="attachment_count" widget="statinfo" string="Lampiran"/>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="Diarsipkan"
+                            bg_color="text-bg-danger" invisible="state != 'draft'"/>
+
+                    <div class="oe_title">
+                        <label for="name" string="Judul Materi"/>
+                        <h1>
+                            <field name="name" placeholder="contoh: Pengenalan SQL Dasar"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Informasi Umum">
+                            <field name="course_id"
+                                   options="{'no_create': True}"/>
+                            <field name="material_type"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group string="Pengaturan Pembelajaran">
+                            <field name="duration_minutes"/>
+                            <field name="is_required"/>
+                        </group>
+                    </group>
+
+                    <group string="Rangkaian Test Materi (Pre-Test &amp; Post-Test)">
+                        <field name="pretest_id" options="{'no_create': True}"/>
+                        <field name="posttest_id" options="{'no_create': True}"/>
+                    </group>
+
+                    <field name="description"
+                           placeholder="Deskripsi singkat tentang materi ini..."
+                           nolabel="0"/>
+
+                    <notebook>
+                        <!-- Konten Teks -->
+                        <page string="Konten" name="content"
+                              invisible="material_type not in ('text', 'mixed')">
+                            <field name="content"
+                                   placeholder="Tulis konten materi di sini..."/>
+                        </page>
+
+                        <!-- Video -->
+                        <page string="Video" name="video"
+                              invisible="material_type not in ('video', 'mixed')">
+                            <group>
+                                <group string="Upload File Video">
+                                    <field name="video_file" filename="video_filename"/>
+                                    <field name="video_filename" invisible="1"/>
+                                </group>
+                                <group string="atau URL Eksternal">
+                                    <field name="video_url"
+                                           placeholder="https://www.youtube.com/embed/..."/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert"
+                                 invisible="not video_url">
+                                <i class="fa fa-info-circle"/>
+                                Pastikan menggunakan URL <strong>embed</strong>
+                                (bukan URL biasa) agar bisa ditampilkan di player.
+                            </div>
+                        </page>
+
+                        <!-- Audio -->
+                        <page string="Audio" name="audio"
+                              invisible="material_type not in ('audio', 'mixed')">
+                            <group>
+                                <field name="audio_file" filename="audio_filename"/>
+                                <field name="audio_filename" invisible="1"/>
+                            </group>
+                        </page>
+
+                        <!-- Dokumen -->
+                        <page string="Dokumen" name="document"
+                              invisible="material_type not in ('document', 'presentation', 'mixed')">
+                            <group>
+                                <field name="document_file" filename="document_filename"/>
+                                <field name="document_filename" invisible="1"/>
+                            </group>
+                        </page>
+
+                        <!-- Lampiran tambahan -->
+                        <page string="Lampiran Tambahan" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- SEARCH VIEW                                                    -->
+    <!-- ============================================================ -->
+    <record id="view_ps_material_search" model="ir.ui.view">
+        <field name="name">pslearning.material.search</field>
+        <field name="model">pslearning.material</field>
+        <field name="arch" type="xml">
+            <search string="Cari Materi">
+                <field name="name" string="Materi"
+                       filter_domain="['|', ('name', 'ilike', self), ('description', 'ilike', self)]"/>
+                <field name="course_id"/>
+                <field name="material_type"/>
+
+                <filter string="Draft" name="filter_draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Dipublikasi" name="filter_published"
+                        domain="[('state', '=', 'published')]"/>
+                <separator/>
+                <filter string="Wajib Dipelajari" name="filter_required"
+                        domain="[('is_required', '=', True)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Course" name="group_course"
+                            context="{'group_by': 'course_id'}"/>
+                    <filter string="Tipe Materi" name="group_type"
+                            context="{'group_by': 'material_type'}"/>
+                    <filter string="Status" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- ACTION                                                         -->
+    <!-- ============================================================ -->
+    <record id="action_ps_material" model="ir.actions.act_window">
+        <field name="name">Materi</field>
+        <field name="res_model">pslearning.material</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="search_view_id" ref="view_ps_material_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Buat materi pembelajaran pertama Anda
+            </p>
+            <p>
+                Materi adalah konten pembelajaran (teks, video, audio, dokumen)
+                yang dikaitkan ke sebuah course.
+            </p>
+        </field>
+    </record>
+
+
+</odoo>

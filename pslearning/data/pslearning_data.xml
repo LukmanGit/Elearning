@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            Sequence untuk pslearning.course
+            Format hasil: PS/30/04/26-001
+            - PS         : prefix tetap
+            - %(day)s    : tanggal (DD)
+            - %(month)s  : bulan (MM)
+            - %(y)s      : tahun 2 digit (YY); pakai %(year)s untuk 4 digit
+            - padding=3  : XXX (3 digit, di-pad dengan nol)
+            Catatan: nomor urut bersifat global incremental, tidak reset harian.
+        -->
+        <record id="seq_ps_course" model="ir.sequence">
+            <field name="name">PS Course Sequence</field>
+            <field name="code">pslearning.course</field>
+            <field name="prefix">PS/%(day)s/%(month)s/%(y)s-</field>
+            <field name="padding">3</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="implementation">standard</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!--
+            Default toggle: sembunyikan header/footer halaman login = ON.
+            noupdate="1" agar hanya di-set saat install; pilihan user lewat
+            Settings tidak akan ditimpa saat upgrade modul.
+        -->
+        <record id="ir_config_hide_login_chrome" model="ir.config_parameter">
+            <field name="key">pslearning.hide_login_chrome</field>
+            <field name="value">True</field>
+        </record>
+
+    </data>
+</odoo>

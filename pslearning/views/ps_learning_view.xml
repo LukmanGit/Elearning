@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- TREE / LIST VIEW                                               -->
+    <!-- ============================================================ -->
+    <record id="view_ps_course_tree" model="ir.ui.view">
+        <field name="name">pslearning.course.tree</field>
+        <field name="model">pslearning.course</field>
+        <field name="arch" type="xml">
+            <tree string="Course" sample="1"
+                  decoration-muted="state == 'archived'"
+                  decoration-success="state == 'published'"
+                  decoration-info="state == 'draft'">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="instructor_id"/>
+                <field name="category"/>
+                <field name="material_count" string="Materi" optional="show"/>
+                <field name="duration" widget="float_time" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'published'"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'upcoming'"
+                       decoration-muted="state == 'archived'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- KANBAN VIEW                                                    -->
+    <!-- ============================================================ -->
+    <record id="view_ps_course_kanban" model="ir.ui.view">
+        <field name="name">pslearning.course.kanban</field>
+        <field name="model">pslearning.course</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" class="o_kanban_dashboard">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="instructor_id"/>
+                <field name="category"/>
+                <field name="duration"/>
+                <field name="state"/>
+                <field name="image"/>
+                <field name="material_count"/>
+                <field name="is_new"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill position-relative">
+                            <span t-if="record.is_new.raw_value"
+                                  class="badge text-bg-danger text-uppercase fw-bold"
+                                  style="position:absolute; top:8px; left:8px; z-index:3; box-shadow:0 2px 6px rgba(0,0,0,.25);">
+                                <i class="fa fa-star me-1"/>New
+                            </span>
+                            <span t-if="record.state.raw_value == 'upcoming'"
+                                  class="badge text-uppercase fw-bold"
+                                  style="position:absolute; top:8px; left:8px; z-index:3; background-color:#cfe2ff; color:#0a58ca; box-shadow:0 2px 6px rgba(10,88,202,.20);">
+                                <i class="fa fa-clock-o me-1"/>Upcoming
+                            </span>
+                            <div class="o_kanban_image_fill_left d-none d-md-block"
+                                 t-attf-style="background-image: url('#{kanban_image('pslearning.course', 'image', record.id.raw_value)}')"
+                                 role="img"/>
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="name"/>
+                                        </strong>
+                                        <small class="o_kanban_record_subtitle text-muted">
+                                            <field name="code"/>
+                                        </small>
+                                    </div>
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {'draft': 'default', 'upcoming': 'warning', 'published': 'success', 'archived': 'secondary'}}"/>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <span class="badge rounded-pill text-bg-light">
+                                        <field name="category"/>
+                                    </span>
+                                    <span t-if="record.duration.raw_value" class="ms-2 text-muted">
+                                        <i class="fa fa-clock-o" role="img" aria-label="Durasi" title="Durasi"/>
+                                        <field name="duration" widget="float_time"/> jam
+                                    </span>
+                                    <span t-if="record.material_count.raw_value" class="ms-2 text-muted">
+                                        <i class="fa fa-book" role="img" aria-label="Materi" title="Jumlah Materi"/>
+                                        <field name="material_count"/> materi
+                                    </span>
+                                    <div class="mt-2 text-muted small">
+                                        <i class="fa fa-user me-1" role="img" aria-label="Pengajar" title="Pengajar"/>
+                                        <span>Pengajar: </span>
+                                        <strong><field name="instructor_id"/></strong>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <span class="text-muted small">
+                                            <field name="instructor_id"/>
+                                        </span>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <img t-att-src="kanban_image('res.users', 'avatar_128', record.instructor_id.raw_value)"
+                                             t-att-title="record.instructor_id.value"
+                                             t-att-alt="record.instructor_id.value"
+                                             class="oe_kanban_avatar o_image_24_cover float-end"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- FORM VIEW                                                      -->
+    <!-- ============================================================ -->
+    <record id="view_ps_course_form" model="ir.ui.view">
+        <field name="name">pslearning.course.form</field>
+        <field name="model">pslearning.course</field>
+        <field name="arch" type="xml">
+            <form string="Course">
+                <header>
+                    <button name="action_publish" type="object"
+                            string="Publikasikan" class="oe_highlight"
+                            invisible="state not in ('draft', 'upcoming')"
+                            groups="pslearning.group_pslearning_manager"/>
+                    <button name="action_set_upcoming" type="object"
+                            string="Tandai Segera Datang"
+                            invisible="state != 'draft'"
+                            groups="pslearning.group_pslearning_manager"/>
+                    <button name="action_set_draft" type="object"
+                            string="Kembalikan ke Draft"
+                            invisible="state == 'draft'"
+                            groups="pslearning.group_pslearning_manager"/>
+                    <button name="action_archive_course" type="object"
+                            string="Arsipkan"
+                            invisible="state != 'published'"
+                            groups="pslearning.group_pslearning_manager"/>
+                    <button name="action_enroll" type="object"
+                            string="Daftar Sekarang" class="oe_highlight"
+                            invisible="state != 'published'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,upcoming,published"/>
+                </header>
+                <sheet>
+                    <field name="publish_ready" invisible="1"/>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="state != 'draft' or publish_ready"
+                         groups="pslearning.group_pslearning_manager">
+                        <strong><i class="fa fa-exclamation-triangle me-1"/>Course belum dapat dipublikasikan.</strong>
+                        Lengkapi prasyarat berikut terlebih dahulu:
+                        <field name="publish_blocker" nolabel="1" readonly="1"/>
+                    </div>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object"
+                                name="action_open_materials" icon="fa-book">
+                            <field name="material_count" widget="statinfo" string="Materi"/>
+                        </button>
+                        <button class="oe_stat_button" type="object"
+                                name="action_open_enrollments" icon="fa-users">
+                            <field name="enrollment_count" widget="statinfo" string="Peserta"/>
+                        </button>
+                    </div>
+
+                    <field name="image" widget="image" class="oe_avatar"
+                           options="{'preview_image': 'image'}"/>
+                    <div class="oe_title">
+                        <label for="name" string="Nama Course"/>
+                        <h1>
+                            <field name="name" placeholder="contoh: PostgreSQL untuk Pemula"/>
+                        </h1>
+                        <label for="code" string="Kode Course"/>
+                        <h3>
+                            <field name="code" readonly="1"/>
+                        </h3>
+                    </div>
+                    <group>
+                        <group string="Informasi Umum">
+                            <field name="instructor_id"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="category"/>
+                            <field name="duration" widget="float_time"/>
+                        </group>
+                        <group string="Pengaturan">
+                            <field name="sequence"/>
+                            <field name="publish_date" invisible="not publish_date"/>
+                            <div class="text-muted fst-italic" colspan="2">
+                                <i class="fa fa-info-circle me-1"/>
+                                Pre-Test dan Post-Test kini diatur per-materi pada
+                                tab "Materi Pembelajaran" / form Materi.
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Deskripsi" name="description">
+                            <field name="description"
+                                   placeholder="Tuliskan deskripsi lengkap course di sini..."/>
+                        </page>
+                        <page string="Materi Pembelajaran" name="materials">
+                            <field name="material_ids">
+                                <tree string="Materi" editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- SEARCH VIEW                                                    -->
+    <!-- ============================================================ -->
+    <record id="view_ps_course_search" model="ir.ui.view">
+        <field name="name">pslearning.course.search</field>
+        <field name="model">pslearning.course</field>
+        <field name="arch" type="xml">
+            <search string="Cari Course">
+                <field name="name" string="Course"
+                       filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
+                <field name="code"/>
+                <field name="instructor_id"/>
+                <field name="category"/>
+
+                <filter string="Tersedia &amp; Segera" name="filter_available"
+                        domain="[('state', 'in', ['published', 'upcoming'])]"/>
+                <separator/>
+                <filter string="Draft" name="filter_draft"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="Segera Datang" name="filter_upcoming"
+                        domain="[('state', '=', 'upcoming')]"/>
+                <filter string="Dipublikasi" name="filter_published"
+                        domain="[('state', '=', 'published')]"/>
+                <filter string="Diarsipkan" name="filter_archived"
+                        domain="[('state', '=', 'archived')]"/>
+                <separator/>
+                <filter string="Pengajar Saya" name="filter_my_courses"
+                        domain="[('instructor_id', '=', uid)]"/>
+
+                <group expand="0" string="Group By">
+                    <filter string="Pengajar" name="group_instructor"
+                            context="{'group_by': 'instructor_id'}"/>
+                    <filter string="Tingkat" name="group_category"
+                            context="{'group_by': 'category'}"/>
+                    <filter string="Status" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!-- ACTION                                                         -->
+    <!-- ============================================================ -->
+    <record id="action_ps_course" model="ir.actions.act_window">
+        <field name="name">Course</field>
+        <field name="res_model">pslearning.course</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_ps_course_search"/>
+        <field name="context">{'search_default_filter_available': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Buat course pertama Anda
+            </p>
+            <p>
+                Course adalah unit pembelajaran utama yang dapat berisi
+                materi, pre-test, dan post-test untuk peserta.
+            </p>
+        </field>
+    </record>
+
+</odoo>

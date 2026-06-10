@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_pslearning_attempt_tree" model="ir.ui.view">
+        <field name="name">pslearning.test.attempt.tree</field>
+        <field name="model">pslearning.test.attempt</field>
+        <field name="arch" type="xml">
+            <tree string="Hasil Test"
+                  decoration-success="is_passed and state == 'done'"
+                  decoration-danger="not is_passed and state == 'done'"
+                  decoration-info="state == 'in_progress'">
+                <field name="display_name"/>
+                <field name="user_id"/>
+                <field name="course_id"/>
+                <field name="test_type" widget="badge"
+                       decoration-info="test_type == 'pretest'"
+                       decoration-warning="test_type == 'posttest'"/>
+                <field name="material_names" string="Judul Materi"/>
+                <field name="start_time"/>
+                <field name="answered_count" string="Soal Dikerjakan"/>
+                <field name="question_count" string="Total Soal" optional="show"/>
+                <field name="score" string="Nilai (%)"/>
+                <field name="is_passed" widget="boolean_toggle" readonly="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'in_progress'"
+                       decoration-muted="state == 'draft'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_pslearning_attempt_form" model="ir.ui.view">
+        <field name="name">pslearning.test.attempt.form</field>
+        <field name="model">pslearning.test.attempt</field>
+        <field name="arch" type="xml">
+            <form string="Pengerjaan Test">
+                <header>
+                    <button name="action_submit" type="object"
+                            string="Kumpulkan Jawaban" class="oe_highlight"
+                            invisible="state != 'in_progress'"
+                            confirm="Yakin ingin mengumpulkan? Jawaban tidak bisa diubah setelah dikumpulkan."/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,in_progress,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <h1><field name="display_name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Informasi">
+                            <field name="user_id" readonly="1"/>
+                            <field name="test_id" readonly="1"/>
+                            <field name="course_id" readonly="1"/>
+                            <field name="start_time" readonly="1"/>
+                            <field name="end_time" readonly="1"/>
+                        </group>
+                        <group string="Hasil" invisible="state != 'done'">
+                            <field name="score" readonly="1"/>
+                            <field name="passing_score" readonly="1"/>
+                            <field name="is_passed" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Soal dan Jawaban" name="answers">
+                            <field name="attempt_answer_ids" nolabel="1"
+                                   readonly="state == 'done'">
+                                <tree editable="bottom" no_open="1">
+                                    <field name="question_id" readonly="1" string="Soal"/>
+                                    <field name="material_id" readonly="1" string="Materi"/>
+                                    <field name="question_type" readonly="1" column_invisible="1"/>
+                                    <field name="selected_answer_id"
+                                           string="Jawaban Pilihan"
+                                           column_invisible="question_type == 'essay'"
+                                           options="{'no_create': True, 'no_open': True}"/>
+                                    <field name="answer_text"
+                                           string="Jawaban Esai"
+                                           column_invisible="question_type != 'essay'"/>
+                                    <field name="is_correct" readonly="1"
+                                           column_invisible="question_type == 'essay'"
+                                           widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pslearning_attempt_search" model="ir.ui.view">
+        <field name="name">pslearning.test.attempt.search</field>
+        <field name="model">pslearning.test.attempt</field>
+        <field name="arch" type="xml">
+            <search string="Cari Hasil Test">
+                <field name="display_name" string="Hasil"/>
+                <field name="user_id"/>
+                <field name="course_id"/>
+                <field name="test_id"/>
+                <filter string="Hasil Saya" name="filter_mine"
+                        domain="[('user_id', '=', uid)]"/>
+                <separator/>
+                <filter string="Pre-Test" name="filter_pretest"
+                        domain="[('test_type', '=', 'pretest')]"/>
+                <filter string="Post-Test" name="filter_posttest"
+                        domain="[('test_type', '=', 'posttest')]"/>
+                <separator/>
+                <filter string="Lulus" name="filter_passed"
+                        domain="[('is_passed', '=', True), ('state', '=', 'done')]"/>
+                <filter string="Selesai" name="filter_done"
+                        domain="[('state', '=', 'done')]"/>
+                <filter string="Sedang Dikerjakan" name="filter_in_progress"
+                        domain="[('state', '=', 'in_progress')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Course" name="group_course"
+                            context="{'group_by': 'course_id'}"/>
+                    <filter string="Peserta" name="group_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Tipe" name="group_type"
+                            context="{'group_by': 'test_type'}"/>
+                    <filter string="Status" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+                <!-- Facet filter by Course -->
+                <searchpanel>
+                    <field name="course_id" string="Course" icon="fa-graduation-cap"
+                           enable_counters="1"/>
+                    <field name="test_type" string="Tipe Test" icon="fa-tags"
+                           enable_counters="1"/>
+                </searchpanel>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pslearning_attempt" model="ir.actions.act_window">
+        <field name="name">Hasil Pembelajaran</field>
+        <field name="res_model">pslearning.test.attempt</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_pslearning_attempt_search"/>
+        <field name="context">{'search_default_filter_mine': 1}</field>
+    </record>
+
+</odoo>

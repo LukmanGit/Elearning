@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- KANBAN VIEW  (Dashboard "Belajar Saya")                       -->
+    <!-- ============================================================ -->
+    <record id="view_pslearning_enrollment_kanban" model="ir.ui.view">
+        <field name="name">pslearning.enrollment.kanban</field>
+        <field name="model">pslearning.enrollment</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" class="o_kanban_dashboard" create="false"
+                    default_order="enrollment_date desc">
+                <field name="id"/>
+                <field name="course_id"/>
+                <field name="user_id"/>
+                <field name="progress"/>
+                <field name="state"/>
+                <field name="is_pretest_done"/>
+                <field name="is_posttest_done"/>
+                <field name="pretest_score"/>
+                <field name="posttest_score"/>
+                <field name="enrollment_date"/>
+                <progressbar field="state"
+                             colors='{"completed": "success", "in_progress": "warning", "enrolled": "info", "cancelled": "muted"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill">
+                            <div class="o_kanban_image_fill_left d-none d-md-block"
+                                 t-attf-style="background-image: url('#{kanban_image('pslearning.course', 'image', record.course_id.raw_value)}')"
+                                 role="img"/>
+                            <div class="oe_kanban_details">
+                                <div class="o_kanban_record_top mb-1">
+                                    <div class="o_kanban_record_headings">
+                                        <strong class="o_kanban_record_title">
+                                            <field name="course_id"/>
+                                        </strong>
+                                        <small class="o_kanban_record_subtitle text-muted">
+                                            <field name="user_id"/>
+                                        </small>
+                                    </div>
+                                    <field name="state" widget="label_selection"
+                                           options="{'classes': {'enrolled': 'info', 'in_progress': 'warning', 'completed': 'success', 'cancelled': 'secondary'}}"/>
+                                </div>
+
+                                <!-- Progress bar -->
+                                <div class="mt-2 mb-2">
+                                    <div class="d-flex justify-content-between small text-muted">
+                                        <span>Progress</span>
+                                        <span><t t-esc="Math.round(record.progress.raw_value)"/>%</span>
+                                    </div>
+                                    <div class="progress" style="height: 7px;">
+                                        <div class="progress-bar bg-success" role="progressbar"
+                                             t-attf-style="width: #{record.progress.raw_value}%"/>
+                                    </div>
+                                </div>
+
+                                <!-- Ringkasan nilai rata-rata -->
+                                <div class="o_kanban_record_body">
+                                    <span t-attf-class="badge rounded-pill me-1 #{record.is_pretest_done.raw_value ? 'text-bg-success' : 'text-bg-light'}">
+                                        <i class="fa fa-pencil-square-o me-1"/>Pre rata2
+                                        (<t t-esc="Math.round(record.pretest_score.raw_value)"/>%)
+                                    </span>
+                                    <span t-attf-class="badge rounded-pill #{record.is_posttest_done.raw_value ? 'text-bg-success' : 'text-bg-light'}">
+                                        <i class="fa fa-flag-checkered me-1"/>Post rata2
+                                        (<t t-esc="Math.round(record.posttest_score.raw_value)"/>%)
+                                    </span>
+                                </div>
+
+                                <!-- Tombol aksi kontekstual -->
+                                <div class="o_kanban_record_bottom mt-2">
+                                    <div class="oe_kanban_bottom_left">
+                                        <button name="action_start_learning" type="object"
+                                                class="btn btn-sm btn-primary"
+                                                invisible="state in ('cancelled', 'completed')">
+                                            <i class="fa fa-book me-1"/>Mulai / Lanjut Belajar
+                                        </button>
+                                        <button name="action_view_report" type="object"
+                                                class="btn btn-sm btn-success"
+                                                invisible="state != 'completed'">
+                                            <i class="fa fa-trophy me-1"/>Report
+                                        </button>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <span class="text-muted small">
+                                            <field name="enrollment_date" widget="date"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_pslearning_enrollment_tree" model="ir.ui.view">
+        <field name="name">pslearning.enrollment.tree</field>
+        <field name="model">pslearning.enrollment</field>
+        <field name="arch" type="xml">
+            <tree string="Enrollment" create="false" delete="false"
+                  decoration-success="state == 'completed'"
+                  decoration-info="state == 'in_progress'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="display_name"/>
+                <field name="user_id"/>
+                <field name="course_id"/>
+                <field name="enrollment_date"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'completed'"
+                       decoration-info="state == 'in_progress'"
+                       decoration-warning="state == 'enrolled'"
+                       decoration-muted="state == 'cancelled'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_pslearning_enrollment_form" model="ir.ui.view">
+        <field name="name">pslearning.enrollment.form</field>
+        <field name="model">pslearning.enrollment</field>
+        <field name="arch" type="xml">
+            <form string="Enrollment" create="false">
+                <header>
+                    <button name="action_start_learning" type="object"
+                            string="Mulai / Lanjut Belajar" class="oe_highlight"
+                            invisible="state in ('cancelled', 'completed')"/>
+                    <button name="action_view_report" type="object"
+                            string="Report Pembelajaran" class="oe_highlight"
+                            invisible="state != 'completed'"/>
+                    <button name="action_cancel" type="object"
+                            string="Batalkan"
+                            invisible="state in ('cancelled', 'completed')"/>
+                    <button name="action_reactivate" type="object"
+                            string="Aktifkan Kembali"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="enrolled,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="display_name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Informasi Pendaftaran">
+                            <field name="user_id" options="{'no_create': True}"/>
+                            <field name="course_id" options="{'no_create': True}"/>
+                            <field name="enrollment_date"/>
+                            <field name="completion_date" readonly="1"/>
+                        </group>
+                        <group string="Progress">
+                            <field name="progress" widget="progressbar"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Ringkasan Test (rata-rata semua materi)" invisible="not course_id">
+                            <field name="is_pretest_done" readonly="1" widget="boolean_toggle"
+                                   string="Semua Pre-Test Selesai"/>
+                            <field name="pretest_score" readonly="1" string="Rata-rata Pre-Test (%)"/>
+                            <field name="is_posttest_done" readonly="1" widget="boolean_toggle"
+                                   string="Semua Post-Test Selesai"/>
+                            <field name="posttest_score" readonly="1" string="Rata-rata Post-Test (%)"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="not course_id">
+                        <i class="fa fa-info-circle me-1"/>
+                        Pembelajaran dilakukan per-materi secara berurutan
+                        (Pre-Test &#8594; Belajar &#8594; Post-Test). Klik
+                        <b>Mulai Belajar</b> untuk membuka jalur pembelajaran.
+                    </div>
+                    <separator string="Materi yang Sudah Dipelajari"/>
+                    <field name="completed_material_ids" nolabel="1" readonly="1">
+                        <tree create="false" delete="false" edit="false">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="material_type"/>
+                            <field name="duration_minutes" string="Durasi (menit)" optional="show"/>
+                        </tree>
+                    </field>
+                    <notebook>
+                        <page string="Riwayat Pre-Test" name="pretest_attempts">
+                            <field name="pretest_attempt_ids" readonly="1">
+                                <tree decoration-success="is_passed"
+                                      decoration-danger="not is_passed and state == 'done'">
+                                    <field name="start_time"/>
+                                    <field name="material_names" string="Judul Materi"/>
+                                    <field name="answered_count" string="Soal Dikerjakan"/>
+                                    <field name="question_count" string="Total Soal" optional="show"/>
+                                    <field name="score" string="Nilai (%)"/>
+                                    <field name="is_passed" widget="boolean_toggle" readonly="1"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Riwayat Post-Test" name="posttest_attempts">
+                            <field name="posttest_attempt_ids" readonly="1">
+                                <tree decoration-success="is_passed"
+                                      decoration-danger="not is_passed and state == 'done'">
+                                    <field name="start_time"/>
+                                    <field name="material_names" string="Judul Materi"/>
+                                    <field name="answered_count" string="Soal Dikerjakan"/>
+                                    <field name="question_count" string="Total Soal" optional="show"/>
+                                    <field name="score" string="Nilai (%)"/>
+                                    <field name="is_passed" widget="boolean_toggle" readonly="1"/>
+                                    <field name="state" widget="badge"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Catatan" name="notes">
+                            <field name="notes" placeholder="Catatan tambahan..." nolabel="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pslearning_enrollment_search" model="ir.ui.view">
+        <field name="name">pslearning.enrollment.search</field>
+        <field name="model">pslearning.enrollment</field>
+        <field name="arch" type="xml">
+            <search string="Cari Enrollment">
+                <field name="user_id"/>
+                <field name="course_id"/>
+                <filter string="Terdaftar" name="filter_enrolled"
+                        domain="[('state', '=', 'enrolled')]"/>
+                <filter string="Sedang Belajar" name="filter_in_progress"
+                        domain="[('state', '=', 'in_progress')]"/>
+                <filter string="Selesai" name="filter_completed"
+                        domain="[('state', '=', 'completed')]"/>
+                <filter string="Pendaftaran Saya" name="filter_mine"
+                        domain="[('user_id', '=', uid)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Course" name="group_course"
+                            context="{'group_by': 'course_id'}"/>
+                    <filter string="Status" name="group_state"
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pslearning_enrollment" model="ir.actions.act_window">
+        <field name="name">Pembelajaran Saya</field>
+        <field name="res_model">pslearning.enrollment</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="search_view_id" ref="view_pslearning_enrollment_search"/>
+        <field name="context">{'search_default_filter_mine': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Belum ada course yang Anda ikuti
+            </p>
+            <p>
+                Buka <b>Katalog Course</b> untuk mendaftar, lalu kerjakan
+                Pre-Test, pelajari materi, kerjakan Post-Test, dan lihat
+                hasil pembelajaran Anda di sini.
+            </p>
+        </field>
+    </record>
+
+</odoo>
