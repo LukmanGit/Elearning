@@ -1,5 +1,15 @@
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.DS_Store
-*.swp
+
+# Arsip & data
+*.zip
+*.dump
+*.sql
+odoo.conf
+
+# Abaikan semua folder modul lain di workspace ini
+/*/
+# kecuali modul yang dipublikasikan
+!pslearning/
