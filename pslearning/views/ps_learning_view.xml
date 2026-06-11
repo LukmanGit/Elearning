@@ -157,7 +157,8 @@
                     <!-- Smart Buttons -->
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object"
-                                name="action_open_materials" icon="fa-book">
+                                name="action_open_materials" icon="fa-book"
+                                groups="pslearning.group_pslearning_manager">
                             <field name="material_count" widget="statinfo" string="Materi"/>
                         </button>
                         <button class="oe_stat_button" type="object"

@@ -4,7 +4,7 @@ from datetime import timedelta
 from markupsafe import Markup, escape
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, AccessError
 from odoo.tools import html2plaintext
 
 
@@ -187,6 +187,9 @@ class PasiCourse(models.Model):
 
     def action_open_materials(self):
         self.ensure_one()
+        if not self.env.user.has_group('pslearning.group_pslearning_manager'):
+            raise AccessError(_(
+                'Anda tidak memiliki akses untuk membuka daftar materi.'))
         return {
             'name': _('Materi: %s') % self.name,
             'type': 'ir.actions.act_window',

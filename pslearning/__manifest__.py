@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'PS Learning',
-    'version': '17.0.13.0.0',
+    'version': '17.0.14.0.0',
     'category': 'Human Resources/Learning',
     'summary': 'Platform E-Learning Internal',
     'description': """
