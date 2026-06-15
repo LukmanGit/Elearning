@@ -83,12 +83,19 @@
                 <header>
                     <button name="action_publish" type="object"
                             string="Publikasikan" class="oe_highlight"
-                            invisible="state != 'draft'"/>
+                            invisible="state != 'draft'"
+                            groups="pslearning.group_pslearning_manager"/>
                     <button name="action_set_draft" type="object"
                             string="Kembalikan ke Draft"
-                            invisible="state != 'published'"/>
+                            invisible="state != 'published'"
+                            groups="pslearning.group_pslearning_manager"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="draft,published"/>
+                           statusbar_visible="draft,published"
+                           groups="pslearning.group_pslearning_manager"/>
+                    <!-- Salinan tersembunyi: agar nilai state tetap tersedia
+                         untuk modifier (mis. web_ribbon) bagi participant -->
+                    <field name="state" invisible="1"
+                           groups="!pslearning.group_pslearning_manager"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
